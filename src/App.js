@@ -14,19 +14,23 @@ import {
 import api from './services/api';
 
 export default function App() {
-  const [repositories, setRepository] = useState([]);
+  const [repositories, setRepositories] = useState([]);
 
   useEffect(()=>{
     api.get('repositories').then( response => {
-      setRepository(response.data);
-      console.log(response.data);
-      console.log('oi');
+      setRepositories(response.data);
     });
   },[]);
 
   async function handleLikeRepository(id) {
     // Implement "Like Repository" functionality
+    const response = await api.post(`repositories/${id}/like`);
 
+    const repositoryIndex = repositories.findIndex( repository => repository.id === id);
+
+    repositories[repositoryIndex].likes = response.data.likes;
+
+    setRepositories([...repositories]);
   }
 
   return (
@@ -60,7 +64,7 @@ export default function App() {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => handleLikeRepository(1)}
+                onPress={() => handleLikeRepository(repository.id)}
                 // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
                 testID={`like-button-1`}
               >
@@ -68,8 +72,7 @@ export default function App() {
               </TouchableOpacity>
             </View> 
           )}
-        />
-       
+        />      
       </SafeAreaView>
     </>
   );
